@@ -353,6 +353,7 @@ void MainWindow::on_actionOpenURL_triggered() {
 
     switch ( dialog.exec()) {
     case QDialog::Accepted:
+        this->m_currentURL = dialog.ui->urlEdit->toPlainText();
         if ( this->validateURL( this->m_currentURL )) {
             this->manager->clear();
             this->manager->add( this->m_currentURL, NetworkRequestManager::Initial );
