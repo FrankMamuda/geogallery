@@ -30,6 +30,7 @@
 // classes
 //
 class MainWindow;
+class ImageLog;
 
 /**
  * @brief The ImageTableModel class
@@ -40,7 +41,8 @@ public:
     int rowCount( const QModelIndex &parent ) const;
     int columnCount( const QModelIndex &parent ) const;
     QVariant data( const QModelIndex &index, int role ) const;
-    void reset() { this->beginResetModel(); this->endResetModel(); }
+    void reset();
+    QList<ImageLog *>list;
 
 private:
     MainWindow *gui;

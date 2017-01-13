@@ -25,12 +25,13 @@
 #include <QObject>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 //
 // namespace Network
 //
 namespace Network {
-static const unsigned int MaxRequests = 5;
+static const unsigned int MaxRequests = 10;
 }
 
 /**
@@ -47,18 +48,24 @@ public:
         NoType = -1,
         Initial,
         HTML,
-        Image
+        Image,
+        CoordInfo
     };
 
     bool isRunning() const { return this->m_running; }
 
+    // TODO: move to PRIVATE
+    QList<QNetworkRequest> activeRequests;
+    QList<QNetworkRequest> requestList;
+
 signals:
-    void finished( const QString &url, NetworkRequestManager::Type type, QByteArray data, bool error );
+    void finished( const QString &url, NetworkRequestManager::Type type, const QVariant &userData, QByteArray data, bool error );
     void stopped();
 
 public slots:
+    void add( const QString &url, NetworkRequestManager::Type type = HTML, const QVariant &userData = QVariant(), bool priority = false );
+    void execute( const QString &url, NetworkRequestManager::Type type = HTML, const QVariant &userData = QVariant(), bool priority = false ) { this->add( url, type, userData, priority ); this->run(); }
     void run();
-    void add( const QString &url, NetworkRequestManager::Type type = HTML, bool priority = false );
     void stop() { this->m_running  = false; }
     void clear();
 
@@ -66,8 +73,7 @@ private slots:
     void replyReceived( QNetworkReply *reply );
 
 private:
-    QList<QNetworkRequest> activeRequests;
-    QList<QNetworkRequest> requestList;
+
     QNetworkAccessManager *accessManager;
     bool m_running;
 };

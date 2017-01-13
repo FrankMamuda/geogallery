@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QDataStream>
 #include <QByteArray>
+#include <QGeoCoordinate>
 
 /**
  * @brief The ExifReader class
@@ -33,7 +34,7 @@ class ExifReader : public QObject {
     Q_OBJECT
 
 public:
-    static bool readGPSCoordinates( const QByteArray &data, QString &out );
+    static bool readGPSCoordinates( const QByteArray &data, QGeoCoordinate &out );
     static double readRational( QDataStream &stream );
 
 private:

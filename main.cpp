@@ -24,9 +24,10 @@
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QTranslator>
-//#include "exif.h"
-//#include <QDir>
-//#include <QDebug>
+#include <QFile>
+#include <QSslCertificate>
+#include <QSslKey>
+#include <QSslConfiguration>
 
 //
 // classes

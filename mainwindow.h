@@ -31,6 +31,7 @@
 #include "ui_mainwindow.h"
 #include "imagemodel.h"
 #include "imagelog.h"
+#include <QHash>
 
 //
 // namespace: Ui
@@ -53,37 +54,45 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow( QWidget *parent = 0 );
     ~MainWindow();
-    QList<ImageLog*> imageLogList;
+    QHash<QString, ImageLog*> imageHash;
+    QMultiHash<QString, ImageLog*> cacheHash;
     QTableView *imageView;
+    QString currentCacheGuid() const { return this->m_currentCacheGuid; }
 
 private slots:
-    void requestProcessed( const QString &url, NetworkRequestManager::Type type, QByteArray data, bool error );
-    void preProcessPage( const QString &data );
-    void parseIntitalRequest( const QString &data);
-    void downloadImages();
-    void getImageList( const QString &data );
-    void readImageMetaData( const QString &url, const QByteArray &data );
-    bool validateURL( const QString &url );
+    void requestProcessed( const QString &url, NetworkRequestManager::Type type, const QVariant &userData, QByteArray data, bool error );
+    int preProcessPage( const QString &data );
+    void parseIntitalRequest( const QString &url, const QString &data, const QVariant &userData );
+    void parseCoordInfoRequest( const QString &data );
+    void stopped();
+    void getImageList( const QString &data, const QString &cacheGuid );
+    void readImageMetaData( const QByteArray &data, const QString &guid );
     void on_actionOpenFolder_triggered();
     void clear();
-    void on_tableView_clicked(const QModelIndex &index);
-    void on_tableView_doubleClicked(const QModelIndex &index);
+    void on_tableView_clicked( const QModelIndex &index );
+    void on_tableView_doubleClicked( const QModelIndex &index );
     void on_actionOpenURL_triggered();
+    void on_actionOpenGPX_triggered();
+    void downloadGallery( const QString &guid, bool clear = true );
+    void setCurrentCacheGuid( const QString &guid = QString::null ) { this->m_currentCacheGuid = guid; }
+    void on_currentCache_currentIndexChanged( const QString &guid );
+    void updateProgessBar();
+    void addCacheToComboBox( const QString &guid );
+
+    void on_actionDebug_triggered();
 
 protected:
     virtual void resizeEvent( QResizeEvent *event );
 
 private:
     Ui::MainWindow *ui;
-    QStringList imageList;
-    QHash<QString, QString> urlHash;
     NetworkRequestManager *manager;
-    int m_totalPages;
-    int m_totalImages;
-    int m_imagesProcessed;
-    QString m_currentURL;
-    QString m_guid;
+    QString m_currentCacheGuid;
     ImageTableModel *imageTableModel;
+    bool validateURL( const QString &url );
+    void addCoordInfoRequest( const QString &url );
+    int m_imagesProcessed;
+    int m_imagesTotal;
 };
 
 #endif // MAINWINDOW_H

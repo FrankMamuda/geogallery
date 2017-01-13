@@ -35,6 +35,9 @@
      <number>2</number>
     </property>
     <item>
+     <widget class="QComboBox" name="currentCache"/>
+    </item>
+    <item>
      <widget class="QTableView" name="tableView">
       <property name="toolTip">
        <string>Double click to open log or image</string>
@@ -120,6 +123,8 @@
    </attribute>
    <addaction name="actionOpenURL"/>
    <addaction name="actionOpenFolder"/>
+   <addaction name="actionOpenGPX"/>
+   <addaction name="actionDebug"/>
   </widget>
   <action name="actionOpenFolder">
    <property name="text">
@@ -132,6 +137,16 @@
   <action name="actionOpenURL">
    <property name="text">
     <string>Open URL</string>
+   </property>
+  </action>
+  <action name="actionOpenGPX">
+   <property name="text">
+    <string>Open GPX</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
    </property>
   </action>
  </widget>

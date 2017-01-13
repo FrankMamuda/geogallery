@@ -19,9 +19,22 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Warning: coord.info URLs are supported only for non-premium caches</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPlainTextEdit" name="urlEdit">
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="plainText">
-      <string>https://www.geocaching.com/seek/gallery.aspx?guid=ff8d82e4-e99f-407b-9a89-3c9cefc5e278</string>
+      <string>https://www.geocaching.com/seek/gallery.aspx?guid=ec80e6cb-1bb7-4737-ba19-f05ad2fcd62e</string>
      </property>
      <property name="placeholderText">
       <string>Paste URL from Geocaching.com gallery</string>

@@ -27,7 +27,6 @@
  * @param parent
  */
 NetworkRequestManager::NetworkRequestManager( QObject *parent ) : QObject( parent ), accessManager( new QNetworkAccessManager ), m_running( false ) {
-    // connect for updates
     this->connect( this->accessManager, SIGNAL( finished( QNetworkReply * )), this, SLOT( replyReceived( QNetworkReply * )));
 }
 
@@ -51,11 +50,12 @@ void NetworkRequestManager::clear() {
  * @brief NetworkRequestManager::add
  * @param request
  */
-void NetworkRequestManager::add( const QString &url, Type type, bool priority ) {
+void NetworkRequestManager::add( const QString &url, Type type, const QVariant &userData, bool priority ) {
     QNetworkRequest request;
 
-    // create request with url and type
+    // create request with requested url, store request type and user data
     request.setAttribute( QNetworkRequest::User, static_cast<int>( type ));
+    request.setAttribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ), userData );
     request.setUrl( QUrl( url ));
 
     // push to queue (redirects take priority)
@@ -104,27 +104,34 @@ void NetworkRequestManager::run() {
  */
 void NetworkRequestManager::replyReceived( QNetworkReply *networkReply ) {
     Type type;
+    int statusCode;
+    QVariant userData;
     bool error = false, redirect = false;
 
     // handle errors externally
-    if ( networkReply->error())
+    if ( networkReply->error() != QNetworkReply::NoError ) {
+        qDebug() << networkReply->error();
         error = true;
+    }
 
-    // get request type
+    // get request type and user data
     type = static_cast<Type>( networkReply->request().attribute( QNetworkRequest::User ).toInt());
+    userData = networkReply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ));
 
-    // check for redirects, add on top of the queue
-    if ( networkReply->attribute( QNetworkRequest::HttpStatusCodeAttribute ).toInt() == 301 ) {
+    // handle redirects
+    statusCode = networkReply->attribute( QNetworkRequest::HttpStatusCodeAttribute ).toInt();
+    if ( statusCode == 301 || statusCode == 302 ) {
         QString redirectURL = networkReply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toString();
-        this->add( redirectURL, type, true );
+        this->add( redirectURL, type, userData, true );
         redirect = true;
     }
 
     // emit signal on finish
     if ( !redirect )
-        emit this->finished( networkReply->url().toString(), type, networkReply->readAll(), error );;
+        emit this->finished( networkReply->url().toString(), type, userData, networkReply->readAll(), error );
 
-    // remove request from active queue
+    // remove request from active queue (must do this manually)
+    //this->activeRequests.removeOne( networkReply->request());
     foreach ( QNetworkRequest request, this->activeRequests ) {
         Type requestType = static_cast<Type>( request.attribute( QNetworkRequest::User ).toInt());
         if ( request.url() == networkReply->url() && requestType == type ) {

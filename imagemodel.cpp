@@ -25,13 +25,11 @@
  * @brief ImageTableModel::columnCount
  * @return
  */
-int ImageTableModel::columnCount( const QModelIndex & ) const {
-    if ( this->gui == NULL )
+int ImageTableModel::columnCount( const QModelIndex & ) const {    
+    if ( !this->list.count() || this->gui == NULL )
         return 0;
 
-    if ( !gui->imageLogList.count())
-        return 0;
-    return static_cast<int>( floor( this->gui->imageView->width() / 128.0f ));;
+    return static_cast<int>( floor( this->gui->imageView->width() / 128.0f ));
 }
 
 /**
@@ -40,13 +38,10 @@ int ImageTableModel::columnCount( const QModelIndex & ) const {
  * @return
  */
 int ImageTableModel::rowCount( const QModelIndex &index ) const {
-    if ( this->gui == NULL )
+    if ( !this->list.count())
         return 0;
 
-    if ( !gui->imageLogList.count())
-        return 0;
-
-    return static_cast<int>( ceil( gui->imageLogList.count() / static_cast<double>( this->columnCount( index ))));;
+    return static_cast<int>( ceil( this->list.count() / static_cast<double>( this->columnCount( index ))));
 }
 
 /**
@@ -56,24 +51,33 @@ int ImageTableModel::rowCount( const QModelIndex &index ) const {
  * @return
  */
 QVariant ImageTableModel::data( const QModelIndex &index, int role ) const {
-    if ( this->gui == NULL )
-        return QVariant();
+    int imageIndex;
 
-    if ( index.isValid()) {
+    if ( index.isValid() && this->gui != NULL ) {
         switch ( role )  {
         case Qt::DecorationRole:
-            int imageIndex = index.row() * this->columnCount( index ) + index.column();
-            if ( imageIndex < 0 || imageIndex >= gui->imageLogList.count())
+            imageIndex = index.row() * this->columnCount( index ) + index.column();
+            if ( imageIndex < 0 || imageIndex >= this->list.count())
                 return QVariant();
 
-            return this->gui->imageLogList.at( imageIndex )->thumbnail();
+            return this->list.at( imageIndex )->thumbnail();
         }
     }
 
     return QVariant();
 }
 
+/**
+ * @brief ImageTableModel::reset
+ */
+void ImageTableModel::reset() {
+    this->list.clear();
 
+    if ( this->gui == NULL )
+        return;
 
-
+    this->beginResetModel();
+    this->list = this->gui->cacheHash.values( this->gui->currentCacheGuid());
+    this->endResetModel();
+}
 

@@ -23,6 +23,9 @@
 // includes
 //
 #include <QPixmap>
+#include <QGeoCoordinate>
+#include "networkrequestmanager.h"
+#include "exifreader.h"
 
 /**
  * @brief The ImageLog class
@@ -31,29 +34,28 @@ class ImageLog : public QObject {
     Q_OBJECT
 
 public:
-    ImageLog( const QString &fileName, const QString &logURL, const QString &coords );
-    QString fileName() const { return this->m_fileName; }
-    QString logURL() const { return this->m_logURL; }
-    QString coords() const { return this->m_coords; }
-    //double latitude() const { return this->m_lat; }
-    //double longitude() const { return this->m_lon; }
+    ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL );
+    QString fileName() const;
+    QGeoCoordinate coords() const { return this->m_coords; }
     QPixmap thumbnail() const { return this->m_thumbnail; }
+    QString imageURL() const { return this->m_imageURL; }
+    QString imageGuid() const { return this->m_imageGuid; }
+    QString logGuid() const { return this->m_logGuid; }
+    QString cacheGuid() const { return this->m_cacheGuid; }
+    QString logURL() const;
 
 public slots:
-    void setFileName( const QString &fileName ) { this->m_fileName = fileName; }
-    void setLogURL( const QString &logURL ) { this->m_logURL = logURL; }
-    void setCoords( const QString &coords ) { this->m_coords = coords; }
-    //void setLatitude( double latitude ) { this->m_lat = latitude; }
-    //void setLongitude( double longitude ) { this->m_lat = longitude; }
-    void setThumbnail( const QPixmap &thumbnail ) { this->m_thumbnail = thumbnail; }
+    void addToDownloadQueue( NetworkRequestManager *manager );
+    void setCoordinates( const QGeoCoordinate &coordinates ) { this->m_coords = coordinates; }
+    void generateThumbnail();
 
 private:
-    QString m_fileName;
-    QString m_logURL;
-    QString m_coords;
+    QGeoCoordinate m_coords;
     QPixmap m_thumbnail;
-    //double m_lat;
-    //double m_lon;
+    QString m_imageGuid;
+    QString m_logGuid;
+    QString m_cacheGuid;
+    QString m_imageURL;
 };
 
 #endif // IMAGELOG_H

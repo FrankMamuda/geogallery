@@ -32,6 +32,7 @@ class Main {
 
 public:
     QSettings *settings;
+    static const int MaxGalleryPages = 250;
 };
 
 //

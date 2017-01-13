@@ -1,4 +1,4 @@
-QT += core gui xml network widgets multimedia
+QT += core gui xml network widgets multimedia location
 
 TARGET = GeoGallery
 TEMPLATE = app
@@ -9,7 +9,8 @@ SOURCES += main.cpp\
     imagemodel.cpp \
     imagelog.cpp \
     exifreader.cpp \
-    openurldialog.cpp
+    openurldialog.cpp \
+    gpxreader.cpp
 
 HEADERS  += mainwindow.h \
     main.h \
@@ -17,7 +18,8 @@ HEADERS  += mainwindow.h \
     imagemodel.h \
     imagelog.h \
     exifreader.h \
-    openurldialog.h
+    openurldialog.h \
+    gpxreader.h
 
 FORMS    += mainwindow.ui \
     openurldialog.ui

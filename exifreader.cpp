@@ -40,13 +40,13 @@ double ExifReader::readRational( QDataStream &stream ) {
  * @param out
  * @return
  */
-bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
+bool ExifReader::readGPSCoordinates( const QByteArray &data, QGeoCoordinate &coordinates ) {
     int offset, skip, gpsOffset = -1, y, latOffset = -1, lonOffset = -1;
     quint16 numGPSEntries;
     QDataStream::ByteOrder byteOrder;
     tiffHeader_s tiffHeader;
-    CoordinateReference latRef = NoReference, lonRef = NoReference;
-    double latDeg, latMin, lonDeg, lonMin;
+    float latRef = 0.0f, lonRef = 0.0f;
+    double lat, lon;
     char coordRef;
 
     // read JPEG header
@@ -123,9 +123,9 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
             coordRef = tag.bytes().at( 0 );
 
             if ( coordRef == 'N' )
-                latRef = North;
+                latRef = 1.0f;
             else if ( coordRef == 'S' )
-                latRef = South;
+                latRef = -1.0f;
 
             break;
 
@@ -143,9 +143,9 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
             coordRef = tag.bytes().at( 0 );
 
             if ( coordRef == 'E' )
-                lonRef = East;
+                lonRef = 1.0f;
             else if ( coordRef == 'W' )
-                lonRef = West;
+                lonRef = -1.0f;
 
             break;
 
@@ -165,7 +165,7 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
     offset += numGPSEntries * 12;
 
     // any useful tags found?
-    if ( latRef == CoordinateReference::NoReference || lonRef == CoordinateReference::NoReference || latOffset == -1 || lonOffset == -1 )
+    if ( latRef == 0.0f || lonRef == 0.0f || latOffset == -1 || lonOffset == -1 )
         return false;
 
     // advance to latitude
@@ -174,8 +174,8 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
     offset += skip;
 
     // read latitude
-    latDeg = ExifReader::readRational( stream );
-    latMin = ExifReader::readRational( stream ) + ExifReader::readRational( stream ) / 60;
+    lat = ExifReader::readRational( stream ) + ExifReader::readRational( stream ) / 60.0f + ExifReader::readRational( stream ) / 3600.0f;
+    lat *= latRef;
     offset += 3 * 8;
 
     // advance to longitude
@@ -183,16 +183,16 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QString &out ) {
     stream.skipRawData( skip );
 
     // read longitude
-    lonDeg = ExifReader::readRational( stream );
-    lonMin = ExifReader::readRational( stream ) + ExifReader::readRational( stream ) / 60;
-    offset += 3 * 8;
+    lon = ExifReader::readRational( stream ) + ExifReader::readRational( stream ) / 60.0f + ExifReader::readRational( stream ) / 3600.0f;
+    lon *= lonRef;
 
     // validate coordinates
-    if ( latDeg > 60.0f || lonDeg > 60.0f )
+    if ( lat > 60.0f || lon > 60.0f )
         return false;
 
     // store coordinate string
-    out = QString( "N %1 %2\nE %3 %4" ).arg( latDeg, 2, 'f' , 0, '0' ).arg( latMin, 6, 'f' , 3, '0' ).arg( lonDeg, 3, 'f' , 0, '0' ).arg( lonMin, 6, 'f' , 3, '0' );
+    coordinates.setLatitude( lat );
+    coordinates.setLongitude( lon );
 
     // report success
     return true;

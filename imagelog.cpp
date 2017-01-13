@@ -20,16 +20,24 @@
 // includes
 //
 #include "imagelog.h"
+#include <QDir>
 
 /**
  * @brief ImageLog::ImageLog
- * @param fileName
- * @param logURL
- * @param lat
- * @param lon
+ * @param imageGuid
+ * @param logGuid
+ * @param cacheGuid
+ * @param imageURL
  */
-ImageLog::ImageLog( const QString &fileName, const QString &logURL, const QString &coords ) : m_fileName( fileName ), m_logURL( logURL ), m_coords( coords ) {
-    QPixmap image( fileName );
+ImageLog::ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL ) : m_imageGuid( imageGuid ), m_logGuid( logGuid ), m_cacheGuid( cacheGuid ), m_imageURL( imageURL ) {
+    /* do nothing for now*/
+}
+
+/**
+ * @brief ImageLog::generateThumbnail
+ */
+void ImageLog::generateThumbnail() {
+    QPixmap image( this->fileName());
     QRect rect;
 
     if ( image.width() > image.height())
@@ -38,4 +46,28 @@ ImageLog::ImageLog( const QString &fileName, const QString &logURL, const QStrin
         rect = QRect( 0, image.height() / 2 - image.width() / 2, image.width(), image.width());
 
     this->m_thumbnail = image.copy( rect ).scaled( 128, 128, Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
+}
+
+/**
+ * @brief ImageLog::addToDownloadQueue
+ * @param manager
+ */
+void ImageLog::addToDownloadQueue( NetworkRequestManager *manager ) {
+    manager->add( this->imageURL(), NetworkRequestManager::Image, this->imageGuid());
+}
+
+/**
+ * @brief ImageLog::logURL
+ * @return
+ */
+QString ImageLog::logURL() const {
+    return QString( "https://www.geocaching.com/seek/log.aspx?LUID=%1" ).arg( this->logGuid());
+}
+
+/**
+ * @brief ImageLog::fileName
+ * @return
+ */
+QString ImageLog::fileName() const {
+    return QString( "%1/cache/%2/%3_%4.jpg" ).arg( QDir::currentPath()).arg( this->cacheGuid()).arg( this->logGuid()).arg( this->imageGuid());
 }
