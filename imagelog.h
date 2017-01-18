@@ -34,7 +34,7 @@ class ImageLog : public QObject {
     Q_OBJECT
 
 public:
-    ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL );
+    ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL = QString(), const QString &cacheName = QString());
     QString fileName() const;
     QGeoCoordinate coords() const { return this->m_coords; }
     QPixmap thumbnail() const { return this->m_thumbnail; }
@@ -42,6 +42,7 @@ public:
     QString imageGuid() const { return this->m_imageGuid; }
     QString logGuid() const { return this->m_logGuid; }
     QString cacheGuid() const { return this->m_cacheGuid; }
+    QString cacheName() const { return this->m_cacheName; }
     QString logURL() const;
 
 public slots:
@@ -56,6 +57,7 @@ private:
     QString m_logGuid;
     QString m_cacheGuid;
     QString m_imageURL;
+    QString m_cacheName;
 };
 
 #endif // IMAGELOG_H

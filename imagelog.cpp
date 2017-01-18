@@ -29,7 +29,7 @@
  * @param cacheGuid
  * @param imageURL
  */
-ImageLog::ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL ) : m_imageGuid( imageGuid ), m_logGuid( logGuid ), m_cacheGuid( cacheGuid ), m_imageURL( imageURL ) {
+ImageLog::ImageLog( const QString &imageGuid, const QString &logGuid, const QString &cacheGuid, const QString &imageURL, const QString &cacheName ) : m_imageGuid( imageGuid ), m_logGuid( logGuid ), m_cacheGuid( cacheGuid ), m_imageURL( imageURL ), m_cacheName( cacheName ) {
     /* do nothing for now*/
 }
 

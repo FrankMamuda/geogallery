@@ -75,11 +75,11 @@ private slots:
     void on_actionOpenGPX_triggered();
     void downloadGallery( const QString &guid, bool clear = true );
     void setCurrentCacheGuid( const QString &guid = QString::null ) { this->m_currentCacheGuid = guid; }
-    void on_currentCache_currentIndexChanged( const QString &guid );
+    //void on_currentCache_currentIndexChanged( const QString &guid );
     void updateProgessBar();
-    void addCacheToComboBox( const QString &guid );
-
+    void addCacheToComboBox( const QString &guid, const QString &name = QString());
     void on_actionDebug_triggered();
+    void on_currentCache_currentIndexChanged( int index );
 
 protected:
     virtual void resizeEvent( QResizeEvent *event );

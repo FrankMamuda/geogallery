@@ -125,6 +125,15 @@ void MainWindow::getImageList( const QString &data, const QString &cacheGuid ) {
     ImageLog *imageLog;
     QString imageURL, imageGuid, logGuid;
 
+
+    QRegularExpression reName( "For&nbsp;<a.*?>(.*?)<\\/a><\\/p>" );
+    QRegularExpressionMatch match2 = reName.match( data );
+    QString cacheName = match2.captured( 1 );
+
+    QTextDocument text;
+    text.setHtml( cacheName );
+    cacheName = text.toPlainText();
+
     // go through image list and create image logs
     rx.setMinimal( true );
     while (( pos = rx.indexIn( data, pos )) != -1 ) {
@@ -141,7 +150,7 @@ void MainWindow::getImageList( const QString &data, const QString &cacheGuid ) {
         logGuid = rx.cap( 1 );
 
         // add new image log
-        imageLog = new ImageLog( imageGuid, logGuid, cacheGuid, imageURL );
+        imageLog = new ImageLog( imageGuid, logGuid, cacheGuid, imageURL, cacheName );
         imageLog->addToDownloadQueue( this->manager );
         this->imageHash[imageGuid] = imageLog;
 
@@ -149,9 +158,6 @@ void MainWindow::getImageList( const QString &data, const QString &cacheGuid ) {
         pos += rx.matchedLength();
         this->m_imagesTotal++;
     }
-
-    // DELETEME: debug
-    qDebug() << "imageList" << this->imageHash.count();
 
     // execute queued requests
     this->manager->run();
@@ -242,13 +248,13 @@ void MainWindow::readImageMetaData( const QByteArray &data, const QString &guid 
         imageLog->setCoordinates( coordinates );
         imageLog->generateThumbnail();
 
-        // DELETEME: debug
-        qDebug() << "hit for" << imageLog->cacheGuid();
-
         // add image to display list
         this->cacheHash.insert( imageLog->cacheGuid(), imageLog );
 
-        this->addCacheToComboBox( imageLog->cacheGuid());
+        //if ( !imageLog->cacheName().isEmpty())
+        //    this->addCacheToComboBox( imageLog->cacheName());
+        //else
+        this->addCacheToComboBox( imageLog->cacheGuid(), imageLog->cacheName());
 
         this->imageTableModel->reset();
     } else {
@@ -335,13 +341,14 @@ void MainWindow::on_actionOpenFolder_triggered() {
                     ImageLog *imageLog;
 
                     // constuct a new image log
-                    imageLog = new ImageLog( imageGuid, logGuid, cacheGuid, "" );
+                    // TODO: default args should be empty!
+                    imageLog = new ImageLog( imageGuid, logGuid, cacheGuid );
                     imageLog->setCoordinates( coordinates );
                     imageLog->generateThumbnail();
 
                     // set current cache guid and add it to combo box
                     this->setCurrentCacheGuid( cacheGuid );
-                    this->addCacheToComboBox( cacheGuid );
+                    this->addCacheToComboBox( cacheGuid, cacheGuid );
 
                     // add to display list
                     this->cacheHash.insert( cacheGuid, imageLog );
@@ -400,17 +407,21 @@ void MainWindow::parseCoordInfoRequest( const QString &data ) {
 /**
  * @brief MainWindow::addCacheToComboBox
  */
-void MainWindow::addCacheToComboBox( const QString &guid ) {
+void MainWindow::addCacheToComboBox( const QString &guid, const QString &name ) {
     int y, found = false;
 
     for ( y = 0; y < this->ui->currentCache->count(); y++ ) {
-        if ( !QString::compare( guid, this->ui->currentCache->itemText( y ))) {
+        /*if ( !QString::compare( guid, this->ui->currentCache->itemText( y ))) {
+            found = true;
+            break;
+        }*/
+        if ( !QString::compare( guid, this->ui->currentCache->itemData( y ).toString())) {
             found = true;
             break;
         }
     }
     if ( !found )
-        this->ui->currentCache->insertItem( 0, guid );
+        this->ui->currentCache->insertItem( 0, name, guid );
 }
 
 /**
@@ -598,16 +609,6 @@ void MainWindow::on_actionOpenGPX_triggered() {
 }
 
 /**
- * @brief MainWindow::on_currentCache_currentIndexChanged
- * @param guid
- */
-void MainWindow::on_currentCache_currentIndexChanged( const QString &guid ) {
-    this->setCurrentCacheGuid( guid );
-    this->ui->coordsDisplay->clear();
-    this->imageTableModel->reset();
-}
-
-/**
  * @brief MainWindow::on_actionDebug_triggered
  */
 void MainWindow::on_actionDebug_triggered() {
@@ -616,8 +617,33 @@ void MainWindow::on_actionDebug_triggered() {
         qDebug() << "  url:" << req.url();
     qDebug() << "run" << this->manager->isRunning();
 
-   // this->manager->run();
+    // this->manager->run();
     //QList values = this->cacheHash.keys()
 
 
 }
+
+/**
+ * @brief MainWindow::on_currentCache_currentIndexChanged
+ * @param guid
+ */
+void MainWindow::on_currentCache_currentIndexChanged( int index ) {
+    if ( index < 0 )
+        return;
+
+    QString guid = this->ui->currentCache->itemData( index ).toString();
+    this->setCurrentCacheGuid( guid );
+    this->ui->coordsDisplay->clear();
+    this->imageTableModel->reset();
+}
+
+/**
+ * @brief MainWindow::on_currentCache_currentIndexChanged
+ * @param guid
+ */
+/*void MainWindow::on_currentCache_currentIndexChanged( const QString &guid ) {
+    this->setCurrentCacheGuid( guid );
+    this->ui->coordsDisplay->clear();
+    this->imageTableModel->reset();
+}*/
+

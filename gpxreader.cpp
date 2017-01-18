@@ -65,11 +65,12 @@ QStringList GPXReader::read( QFile *file ) {
  * @return
  */
 QString GPXReader::parseWaypointElement( const QDomElement &element ) {
-    QString url;
+    QString url;//, cacheName;
     QRegularExpression re( "\\/seek\\/cache_details.aspx\\?guid=([a-z0-9-]+)" );
     QRegularExpressionMatch match;
 
     url = element.firstChildElement( "url" ).text();
+    //cacheName = element.firstChildElement( "urlname" ).text();
     if ( url.isEmpty())
         return "";
 

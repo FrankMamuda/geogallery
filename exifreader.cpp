@@ -187,7 +187,7 @@ bool ExifReader::readGPSCoordinates( const QByteArray &data, QGeoCoordinate &coo
     lon *= lonRef;
 
     // validate coordinates
-    if ( lat > 60.0f || lon > 60.0f )
+    if (( lat > 60.0f || lon > 60.0f ) || ( lat == 0 && lon == 0 ))
         return false;
 
     // store coordinate string
